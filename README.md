@@ -144,3 +144,88 @@ spring:
         </dependency>
 ```
 This enables Spring Boot to connect with Redis using RedisTemplate and manage data operations like token blacklisting.
+
+---
+---
+## Running the Application with Docker  
+You can run the entire application — Spring Boot app, PostgreSQL, and Redis — using Docker Compose.
+
+## Prerequisites
+- Docker
+- Docker Compose
+- (Optional) Postman or curl for API testing
+
+## Step-by-Step: Dockerizing the App  
+1- Clone the repository  
+```
+bash:
+git clone https://github.com/seyedin/secure-auth-jwt-postgres-redis.git
+cd secure-auth-jwt-postgres-redis
+ ```
+2- Ensure Redis is properly configured in your application.yml Your application.yml should include the following (which it already does):  
+```
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+```
+- This allows Redis to work both in local and Docker environments.
+
+3- Build and start all containers using Docker Compose  
+```
+bash:
+docker-compose up --build
+```
+This will:  
+- Build the Spring Boot app’s Docker image
+- Start three containers: app, PostgreSQL, and Redis
+- Set up networking between them
+- Map port 8080 to your local machine
+
+4- Access the application Once the containers are running, you can open the Swagger UI in your browser:  
+```
+bash:
+http://localhost:8080/swagger-ui/index.html
+```
+You can use it to test endpoints like signUp, signIn, and signOut.  
+
+5- Shut down and clean up (optional) To stop and remove all containers, volumes, and networks: 
+```
+bash:
+docker-compose down -v
+```
+After these steps, your authentication service is fully containerized and ready for further deployment  
+
+---
+---
+## 🔄 Rebuilding Docker Environment from Scratch  
+- If you'd like to fully reset your containers and rebuild everything from a clean state:
+
+1- Navigate to the project root directory:  
+```
+bash:
+cd /path/to/your/project
+```
+2- Shut down all containers and remove associated volumes:  
+```
+bash:
+docker-compose down -v
+```
+This command will:  
+- Stop all running containers
+- Remove attached volumes (like PostgreSQL data)
+- Delete the internal Docker network
+
+3- Remove the existing app image (optional, but recommended):
+```
+bash:
+docker rm secure-auth-app
+```
+> Replace secure-auth-app with the actual image name from docker images if different.
+
+4- Rebuild and run everything:  
+```
+bash:
+docker-compose up --build
+```
+You’ll now have a clean, fresh Dockerized environmen
