@@ -1,0 +1,118 @@
+package com.secureauth.exception;
+
+/**
+ * Enumeration of HTTP error codes used in the application.
+ */
+public enum ErrorCode {
+
+    // 1xx: Informational
+    CONTINUE(100),
+    SWITCHING_PROTOCOLS(101),
+    PROCESSING(102),
+
+    // 2xx: Success
+    OK(200),
+    CREATED(201),
+    ACCEPTED(202),
+    NON_AUTHORITATIVE_INFORMATION(203),
+    NO_CONTENT(204),
+    RESET_CONTENT(205),
+    PARTIAL_CONTENT(206),
+
+    // 3xx: Redirection
+    MULTIPLE_CHOICES(300),
+    MOVED_PERMANENTLY(301),
+    FOUND(302),
+    SEE_OTHER(303),
+    NOT_MODIFIED(304),
+    TEMPORARY_REDIRECT(307),
+    PERMANENT_REDIRECT(308),
+
+    // 4xx: Client Errors
+    BAD_REQUEST(400),
+    UNAUTHORIZED(401),
+    PAYMENT_REQUIRED(402),
+    FORBIDDEN(403),
+    NOT_FOUND(404),
+    METHOD_NOT_ALLOWED(405),
+    NOT_ACCEPTABLE(406),
+    PROXY_AUTHENTICATION_REQUIRED(407),
+    REQUEST_TIMEOUT(408),
+    CONFLICT(409),
+    GONE(410),
+    LENGTH_REQUIRED(411),
+    PRECONDITION_FAILED(412),
+    PAYLOAD_TOO_LARGE(413),
+    URI_TOO_LONG(414),
+    UNSUPPORTED_MEDIA_TYPE(415),
+    RANGE_NOT_SATISFIABLE(416),
+    EXPECTATION_FAILED(417),
+    UNPROCESSABLE_ENTITY(422),
+    TOO_MANY_REQUESTS(429),
+    CATEGORY_INVALID(40),
+    MAIN_CATEGORY_INVALID(41),
+    ALREADY_EXIST(42),
+    PHOTO_INVALID(43),
+    IMAGE_CAN_NOT_UPLOAD(44),
+    ORDER_STATUS_SHOULD_NOT_BE_PAID(45),
+    CREDIT_NOT_ENOUGH(46),
+    INVALID_AMOUNT(47),
+    USER_STATUS_NOT_APPROVED(48),
+    SERVER_ERROR(49),
+    INVALID_EMAIL_OR_PASSWORD(50),
+    ROLE_NOT_ALLOWED(51),
+    INVALID_DATA(52),
+    DUPLICATE_CATEGORY(53),
+    NO_USERS_FOUND(54),
+    FAILED_TO_CONVERT_BYT_ARRAY_TO_BLOB(56),
+    FAILED_TO_CONVERT_BLOB_TO_BYT_ARRAY(57),
+    MISSING_PARAMETER(58),
+    VALIDATION_ERROR(59),
+    TYPE_MISMATCH(60),
+    CATEGORY_NOT_BELONGS_TO_USER(61),
+    ORDER_ALREADY_COMPLETE(62),
+    ORDER_ALREADY_WAITING_FOR_EXPERT_ARRIVAL(63),
+    ORDER_ALREADY_STARTED(64),
+    DUPLICATE_OFFER(65),
+    DUPLICATE_ORDER(67),
+    USER_IS_NOT_CUSTOMER(55),
+    USER_IS_NOT_EXPERT(66),
+    INVALID_CATEGORY(67),
+    DUPLICATE_CARD_NUMBER(68),
+    CARD_LIMIT_EXCEEDED(69),
+    ORDER_ALREADY_IN_STATUS(70),
+    INVALID_USER_TYPE(71),
+    PASSWORD_INVALID(72),
+    ERROR_SENDING_VERIFY(73),
+    USER_DELETED(74),
+    USER_NOT_APPROVED(75),
+    INVALID_USER_ROLE(76),
+
+    // 5xx: Server Errors
+    INTERNAL_SERVER_ERROR(500),
+    NOT_IMPLEMENTED(501),
+    BAD_GATEWAY(502),
+    SERVICE_UNAVAILABLE(503),
+    GATEWAY_TIMEOUT(504),
+    HTTP_VERSION_NOT_SUPPORTED(505);
+
+    private final int code;
+
+    /**
+     * Constructs an ErrorCode with the specified numeric code.
+     *
+     * @param code the integer value representing the HTTP status code.
+     */
+    ErrorCode(int code) {
+        this.code = code;
+    }
+
+    /**
+     * Gets the error code.
+     *
+     * @return the error code.
+     */
+    public int getCode() {
+        return code;
+    }
+}

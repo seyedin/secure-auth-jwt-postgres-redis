@@ -1,0 +1,156 @@
+قدم ۱: راه‌اندازی کانتینر Redis در Docker
+1. چک کردن Docker Desktop:
+   - مطمئن بشید Docker Desktop در حال اجراست.
+2. دانلود ایمیج Redis (اگه قبلاً دانلود نشده):
+   ```bash
+   docker pull redis
+   ```
+3. اجرای کانتینر Redis:
+   ```bash
+   docker run -d --name redis -p 6379:6379 redis
+   ```
+4. چک کردن وضعیت کانتینر:
+   ```bash
+   docker ps
+   ```
+5. تست اتصال به Redis:
+   ```bash
+   docker exec -it redis redis-cli ping
+   ```
+
+قدم ۲: افزودن وابستگی Redis به پروژه
+1. اضافه کردن وابستگی به `pom.xml`:
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-data-redis</artifactId>
+   </dependency>
+   ```
+2. به‌روزرسانی وابستگی‌ها:
+   ```bash
+   mvn clean install
+   ```
+
+قدم ۳: کانفیگ Redis در Spring Boot
+1. اضافه کردن تنظیمات Redis به `application.yml`:
+   ```yaml
+   spring:
+     redis:
+       host: localhost
+       port: 6379
+       database: 0
+       timeout: 60000
+   ```
+
+قدم ۴: به‌روزرسانی کد برای مدیریت Redis
+1. اضافه کردن لاگ به `TokenBlacklistServiceImpl`:
+   ```java
+   @Service
+   @RequiredArgsConstructor
+   public class TokenBlacklistServiceImpl implements TokenBlacklistService {
+       private final RedisTemplate<String, String> redisTemplate;
+       private static final String BLACKLIST_PREFIX = "blacklisted:";
+
+       @Override
+       public void blacklistToken(String token) {
+           try {
+               log.info("Blacklisting token: {}", token);
+               redisTemplate.opsForValue().set(
+                       BLACKLIST_PREFIX + token,
+                       "true",
+                       86400000,
+                       TimeUnit.MILLISECONDS
+               );
+               log.info("Token blacklisted successfully");
+           } catch (Exception e) {
+               log.error("Failed to blacklist token: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+               throw e;
+           }
+       }
+
+       @Override
+       public Boolean isTokenBlacklisted(String token) {
+           try {
+               log.info("Checking if token is blacklisted: {}", token);
+               Boolean exists = redisTemplate.hasKey(BLACKLIST_PREFIX + token);
+               log.info("Token blacklisted: {}", exists);
+               return exists;
+           } catch (Exception e) {
+               log.error("Error checking token blacklist: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+               throw e;
+           }
+       }
+   }
+   ```
+2. مدیریت خطای Redis در `JwtAuthFilter`:
+   ```java
+   @Override
+   protected void doFilterInternal(HttpServletRequest request,
+                                   HttpServletResponse response,
+                                   FilterChain filterChain)
+           throws ServletException, IOException {
+       try {
+           String token = extractToken(request);
+           log.info("Extracted token: {}", token);
+           if (token != null) {
+               boolean isBlacklisted = false;
+               try {
+                   isBlacklisted = tokenBlacklistService.isTokenBlacklisted(token);
+                   log.info("Token blacklisted: {}", isBlacklisted);
+               } catch (RedisConnectionFailureException e) {
+                   log.warn("Redis unavailable, skipping blacklist check: {}", e.getMessage());
+               }
+               if (!isBlacklisted) {
+                   String username = jwtTokenProvider.extractUsername(token);
+                   log.info("Extracted username: {}", username);
+                   UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                   if (jwtTokenProvider.isValid(token, userDetails)) {
+                       UsernamePasswordAuthenticationToken authentication =
+                               new UsernamePasswordAuthenticationToken(
+                                       userDetails, null, userDetails.getAuthorities());
+                       authentication.setDetails(
+                               new WebAuthenticationDetailsSource().buildDetails(request)
+                       );
+                       SecurityContextHolder.getContext().setAuthentication(authentication);
+                   } else {
+                       log.warn("Token validation failed");
+                   }
+               } else {
+                   log.warn("Token is blacklisted");
+                   jwtAuthEntryPoint.commence(request, response, new AuthenticationException("Token is blacklisted") {});
+                   return;
+               }
+           } else {
+               log.warn("No token provided");
+           }
+       } catch (Exception ex) {
+           log.error("Authentication error: {} - {}", ex.getClass().getSimpleName(), ex.getMessage());
+           jwtAuthEntryPoint.commence(request, response, new AuthenticationException("Invalid token", ex) {});
+           return;
+       }
+       log.info("Proceeding to filter chain");
+       filterChain.doFilter(request, response);
+   }
+   ```
+
+قدم ۵: تست اپلیکیشن
+1. اجرای اپلیکیشن Spring Boot.
+2. تست اتصال Redis:
+   ```bash
+   docker exec -it redis redis-cli ping
+   ```
+3. تست Login:
+   ```
+   POST http://localhost:8080/v1/auth/login
+   Content-Type: application/json
+   {
+       "username": "your-username",
+       "password": "your-password"
+   }
+   ```
+4. تست Logout:
+   ```
+   POST http://localhost:8080/v1/auth/logout
+   Authorization: Bearer <fresh-token>
+   ```
+5. چک کردن لاگ‌ها برای تأیید blacklist و اجرای کنترلر.

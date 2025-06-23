@@ -1,0 +1,43 @@
+#spring.application.name=secure-auth
+server:
+  port: 8080
+
+spring:
+  application:
+    name: Secure Auth
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/secureauth
+    username: Maktab
+    password: Maktab123
+    hikari:
+      auto-commit: false
+      # تنظیمات اضافی Hikari برای پایداری
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true  # اضافه کردن برای خوانایی بهتر SQL
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 60000
+
+#  servlet:
+#    multipart:
+#      max-file-size: 300KB
+#      max-request-size: 300KB
+jwt:
+  secret: mySecretKeyWhichShouldBeAtLeast32CharactersLong!
+  expiration: 86400000 # 1 روز (به میلی‌ثانیه)
